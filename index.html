@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing City Deutschland</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0C0F; --surface: #16161C; --surface2: #1E1E27;
+    --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.18);
+    --text: #F0EEF8; --muted: rgba(240,238,248,0.45);
+    --accent: #7C5CFF; --accent2: #FF5C8A; --accent3: #5CFFB8; --yellow: #FFD166;
+    --fd: 'Syne', sans-serif; --fb: 'DM Sans', sans-serif;
+    --r: 14px; --rs: 8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:16px}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 60px}
+  .screen{display:none;width:100%;max-width:540px;padding:0 18px}
+  .screen.active{display:block}
+  #hud{width:100%;max-width:540px;padding:16px 18px 0;display:flex;gap:10px;margin-bottom:20px}
+  .hud-chip{background:var(--surface);border:0.5px solid var(--border);border-radius:99px;padding:6px 14px;font-family:var(--fd);font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .hud-chip span{color:var(--muted);font-size:11px;font-weight:400}
+  #xpw{width:100%;max-width:540px;padding:0 18px 20px}
+  #xpbg{height:3px;background:var(--surface2);border-radius:99px;overflow:hidden}
+  #xpfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s}
+  .city-title{font-family:var(--fd);font-size:28px;font-weight:800;margin-bottom:4px;line-height:1.15}
+  .city-title em{color:var(--accent);font-style:normal}
+  .city-sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+  .city-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .agc{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .2s,transform .15s;position:relative;overflow:hidden}
+  .agc:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+  .ag-icon{font-size:26px;margin-bottom:8px}
+  .ag-name{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:2px}
+  .ag-city{font-size:11px;color:var(--muted);margin-bottom:8px}
+  .ag-tag{font-size:10px;font-weight:500;padding:3px 8px;border-radius:99px;display:inline-block}
+  .ag-done{position:absolute;top:10px;right:10px;font-size:10px;background:#1a2e22;color:var(--accent3);border:0.5px solid var(--accent3);padding:2px 8px;border-radius:99px;font-weight:700}
+  .back{font-size:13px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--fb);padding:0;margin-bottom:20px;display:flex;align-items:center;gap:4px;transition:color .15s}
+  .back:hover{color:var(--text)}
+  .hub-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+  .hub-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
+  .hub-meta{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+  .hub-clients{font-size:11px;color:var(--accent)}
+  .q-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:18px 20px}
+  .q-name{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:4px}
+  .q-meta{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .q-done{font-size:13px;color:var(--accent3);font-weight:500}
+  .gtitle{font-family:var(--fd);font-size:20px;font-weight:800;margin-bottom:4px}
+  .gsub{font-size:13px;color:var(--muted);margin-bottom:18px}
+  .prog{font-size:11px;color:var(--muted);margin-bottom:10px}
+  .bigbox{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;font-size:48px;margin-bottom:14px;min-height:90px;display:flex;align-items:center;justify-content:center}
+  .brief{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;font-size:14px;line-height:1.65;margin-bottom:14px;color:rgba(240,238,248,0.85)}
+  .fb{padding:12px 16px;border-radius:var(--rs);font-size:13px;line-height:1.6;margin:12px 0}
+  .fb-ok{background:rgba(92,255,184,0.1);border:0.5px solid var(--accent3);color:#a0ffe0}
+  .fb-fail{background:rgba(255,92,138,0.1);border:0.5px solid var(--accent2);color:#ffa0bc}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .opt{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 10px;cursor:pointer;font-size:13px;text-align:center;font-family:var(--fb);color:var(--text);transition:all .15s;line-height:1.4}
+  .opt:hover{border-color:var(--border-hover);background:var(--surface2)}
+  .opt.correct{background:rgba(92,255,184,0.12);border-color:var(--accent3);color:#a0ffe0}
+  .opt.wrong{background:rgba(255,92,138,0.12);border-color:var(--accent2);color:#ffa0bc}
+  .colopts{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+  .colopt{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rs);padding:13px 16px;cursor:pointer;font-size:13px;font-family:var(--fb);color:var(--text);text-align:left;transition:all .15s;line-height:1.5}
+  .colopt:hover{border-color:var(--border-hover);background:var(--surface2)}
+  .colopt.correct{background:rgba(92,255,184,0.12);border-color:var(--accent3);color:#a0ffe0}
+  .colopt.wrong{background:rgba(255,92,138,0.12);border-color:var(--accent2);color:#ffa0bc}
+  .crgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .crcard{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;cursor:pointer;text-align:center;font-size:11px;line-height:1.4;transition:all .15s;color:var(--text)}
+  .crcard:hover{border-color:var(--border-hover)}
+  .crcard.selected{border-color:var(--accent);background:rgba(124,92,255,0.12)}
+  .crcard.correct{background:rgba(92,255,184,0.12);border-color:var(--accent3);color:#a0ffe0}
+  .crcard.wrong{background:rgba(255,92,138,0.12);border-color:var(--accent2);color:#ffa0bc}
+  .cricon{font-size:24px;margin-bottom:4px}
+  .trendbts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .trbtn{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--r);padding:20px 10px;cursor:pointer;font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text);transition:all .15s;text-align:center}
+  .trbtn:hover{border-color:var(--border-hover);background:var(--surface2)}
+  .ticon{font-size:28px;display:block;margin-bottom:6px}
+  .slwrap{margin-bottom:14px}
+  .sllabel{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .sllabel span:last-child{font-family:var(--fd);font-weight:700;color:var(--accent)}
+  input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:var(--surface2);border-radius:99px;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 0 4px rgba(124,92,255,0.2)}
+  .btrow{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:14px}
+  .btrow strong{font-family:var(--fd);font-size:16px;color:var(--yellow)}
+  .btn{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--rs);padding:10px 20px;font-size:14px;cursor:pointer;font-family:var(--fb);color:var(--text);transition:all .15s}
+  .btn:hover{border-color:var(--border-hover);background:var(--surface2)}
+  .btnp{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+  .btnp:hover{background:#6a4fe0;border-color:#6a4fe0}
+  .btns{padding:8px 16px;font-size:13px}
+  .luwrap{text-align:center;padding:3rem 1rem}
+  .lunum{font-family:var(--fd);font-size:72px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .luwrap h2{font-family:var(--fd);font-size:24px;font-weight:800;margin:8px 0 8px}
+  .luwrap p{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .intrwrap{text-align:center;padding:3rem 1rem 2rem}
+  .intrico{font-size:52px;margin-bottom:16px}
+  .intrtitle{font-family:var(--fd);font-size:32px;font-weight:800;line-height:1.1;margin-bottom:8px}
+  .intrtitle em{color:var(--accent);font-style:normal}
+  .intrsub{color:var(--muted);font-size:14px;margin-bottom:32px;line-height:1.7}
+  .prevlist{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:28px}
+  .prevchip{background:var(--surface);border:0.5px solid var(--border);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted)}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:99px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .screen.active{animation:fadeUp .25s ease}
+</style>
+</head>
+<body>
+
+<div id="hud" style="display:none">
+  <div class="hud-chip"><span>LVL</span><strong id="hlvl">1</strong></div>
+  <div class="hud-chip"><span>XP</span><strong id="hxp">0</strong></div>
+  <div class="hud-chip"><span>💰</span><strong id="hco">0</strong></div>
+</div>
+<div id="xpw" style="display:none"><div id="xpbg"><div id="xpfill" style="width:0%"></div></div></div>
+
+<!-- INTRO -->
+<div id="s-intro" class="screen active">
+  <div class="intrwrap">
+    <div class="intrico">🏙️</div>
+    <div class="intrtitle">Marketing City<br><em>Deutschland</em></div>
+    <p class="intrsub">Besuche echte deutsche Agenturen, löse ihre einzigartigen Quests und werde zum Marketing-Profi.</p>
+    <div class="prevlist">
+      <span class="prevchip">🦁 Jung von Matt</span><span class="prevchip">⭐ Serviceplan</span>
+      <span class="prevchip">🎬 Anti Boring CC</span><span class="prevchip">⛪ DOJO Berlin</span>
+      <span class="prevchip">🤝 Scholz & Friends</span><span class="prevchip">🎤 The Ambition</span>
+      <span class="prevchip">🌐 Publicis</span><span class="prevchip">💼 WPP / Ogilvy</span>
+    </div>
+    <button class="btn btnp" style="font-size:15px;padding:12px 32px" onclick="startGame()">Spiel starten</button>
+  </div>
+</div>
+
+<!-- WORLD -->
+<div id="s-world" class="screen">
+  <div class="city-title">Marketing City<br><em>Deutschland</em></div>
+  <p class="city-sub">Wähle eine Agentur und starte deine Quest.</p>
+  <div class="city-grid" id="citygrid"></div>
+</div>
+
+<!-- AGENCY -->
+<div id="s-agency" class="screen">
+  <button class="back" onclick="go('world')">← Marketing City</button>
+  <div class="hub-card" id="aghdr"></div>
+  <div class="q-card" id="agqs"></div>
+</div>
+
+<!-- LOGO (JvM) -->
+<div id="s-logo" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Logo Quiz</div><p class="gsub">Welche Marke steckt hinter diesem Logo-Emoji?</p>
+  <div class="bigbox" id="logemoji"></div>
+  <div class="prog" id="logprog"></div><div id="logfb"></div>
+  <div class="opts" id="logopts"></div>
+  <div id="lognxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextLogo()">Weiter →</button></div>
+</div>
+
+<!-- PITCH (Serviceplan) -->
+<div id="s-pitch" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Cannes Pitch</div><p class="gsub">Welche Idee hat den Cannes Lion gewonnen?</p>
+  <div class="brief" id="pitchbrief"></div>
+  <div class="prog" id="pitchprog"></div><div id="pitchfb"></div>
+  <div class="colopts" id="pitchopts"></div>
+  <div id="pitchnxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextPitch()">Weiter →</button></div>
+</div>
+
+<!-- CREATOR (ABCC) -->
+<div id="s-creator" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Creator Matching</div><p class="gsub">Wähle alle passenden Creator-Typen für diese Kampagne.</p>
+  <div class="brief" id="crbrief"></div>
+  <div class="prog" id="crprog"></div><div id="crfb"></div>
+  <div class="crgrid" id="cropts"></div>
+  <div id="crnxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextCreator()">Weiter →</button></div>
+</div>
+
+<!-- HEADLINE (DOJO) -->
+<div id="s-headline" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Headline Battle</div><p class="gsub">Welche Headline hat DOJO wirklich verwendet?</p>
+  <div class="brief" id="hlbrief"></div>
+  <div class="prog" id="hlprog"></div><div id="hlfb"></div>
+  <div class="colopts" id="hlopts"></div>
+  <div id="hlnxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextHeadline()">Weiter →</button></div>
+</div>
+
+<!-- SLOGAN (Scholz & Friends) -->
+<div id="s-slogan" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Slogan-Legenden</div><p class="gsub">Von welcher Marke oder Institution stammt dieser Slogan?</p>
+  <div class="bigbox" id="slogantext" style="font-size:17px;font-style:italic;line-height:1.5;text-align:center"></div>
+  <div class="prog" id="sloganprog"></div><div id="sloganfb"></div>
+  <div class="colopts" id="sloganopts"></div>
+  <div id="slogannxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextSlogan()">Weiter →</button></div>
+</div>
+
+<!-- HIP-HOP (The Ambition) -->
+<div id="s-hiphop" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Hip-Hop Brand Match</div><p class="gsub">Welche Marke steckt hinter dieser Kollabo?</p>
+  <div class="brief" id="hhscenario"></div>
+  <div class="prog" id="hhprog"></div><div id="hhfb"></div>
+  <div class="opts" id="hhopts"></div>
+  <div id="hhnxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextHiphop()">Weiter →</button></div>
+</div>
+
+<!-- TREND (Publicis) -->
+<div id="s-trend" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Trend oder Flop?</div><p class="gsub">Bewerte diesen Marketing-Move!</p>
+  <div class="brief" id="trendscen" style="font-style:normal"></div>
+  <div class="prog" id="trendprog"></div><div id="trendfb"></div>
+  <div class="trendbts" id="trendbtns">
+    <button class="trbtn" onclick="answerTrend('trend')"><span class="ticon">📈</span>Trend</button>
+    <button class="trbtn" onclick="answerTrend('flop')"><span class="ticon">📉</span>Flop</button>
+  </div>
+  <div id="trendnxt" style="display:none;margin-top:4px"><button class="btn btnp btns" onclick="nextTrend()">Weiter →</button></div>
+</div>
+
+<!-- BUDGET (WPP) -->
+<div id="s-budget" class="screen">
+  <button class="back" onclick="go('agency')">← Zurück</button>
+  <div class="gtitle">Budget Allocator</div><p class="gsub">Verteile das Kampagnenbudget optimal.</p>
+  <div class="brief" id="budbrief"></div>
+  <div id="budsliders"></div>
+  <div class="btrow">Gesamt: <strong id="budtotal">100 %</strong></div>
+  <div id="budfb"></div>
+  <button class="btn btnp btns" onclick="checkBudget()">Auswerten</button>
+</div>
+
+<!-- LEVEL UP -->
+<div id="s-levelup" class="screen">
+  <div class="luwrap">
+    <div class="lunum" id="lunum">2</div>
+    <h2>Level Up! 🎉</h2>
+    <p id="lumsg">Du bist jetzt Level 2!</p>
+    <button class="btn btnp" onclick="go('world')">Weiter spielen</button>
+  </div>
+</div>
+
+<script>
+const S={xp:0,level:1,coins:0,next:100,agency:'',done:{}};
+
+const AGENCIES=[
+  {id:'jvm',       name:'Jung von Matt',          city:'Hamburg',      icon:'🦁',type:'Kreativagentur',      tc:'rgba(124,92,255,0.15)',tt:'#b8a0ff',clients:'Edeka, BVG, Mercedes-Benz',        desc:'Deutschlands kreativste unabhängige Agentur – bekannt für mutige, preisgekrönte Ideen.',         game:'logo',    gname:'Logo Quiz',          xp:25,co:10},
+  {id:'serviceplan',name:'Serviceplan',            city:'München',      icon:'⭐',type:'Full-Service',         tc:'rgba(255,209,102,0.12)',tt:'#ffd166',clients:'Penny, MINI, BMW, Siemens',        desc:'Nr. 1 im ADC-Kreativranking – größte inhabergeführte Agenturgruppe Europas.',                   game:'pitch',   gname:'Cannes Pitch',       xp:30,co:12},
+  {id:'abcc',      name:'Anti Boring Content Club',city:'Berlin',       icon:'🎬',type:'Creator & Influencer', tc:'rgba(255,92,138,0.12)', tt:'#ff8ab0',clients:'350+ Brands, dm, Rewe',           desc:'Erster Creator Marketplace Deutschlands – authentischer Content statt Hochglanz.',               game:'creator', gname:'Creator Matching',   xp:25,co:10},
+  {id:'dojo',      name:'DOJO',                   city:'Berlin',       icon:'⛪',type:'Kreativagentur',       tc:'rgba(255,160,60,0.12)', tt:'#ffb060',clients:'Aldi Süd, Spotify, EasyJet, Berlin',desc:'Aus einer Kreuzberger Kirche – frech, relevant, viral. "#DojoRuinedMyLife".',                  game:'headline',gname:'Headline Battle',    xp:25,co:10},
+  {id:'scholz',    name:'Scholz & Friends',        city:'Hamburg/Berlin',icon:'🤝',type:'Agentur des Jahrzehnts',tc:'rgba(92,184,255,0.1)',  tt:'#7cc8ff',clients:'FAZ, Opel, McDonald\'s, VW, Audi',desc:'"Agentur des Jahrzehnts" – Erschaffer ikonischer Slogans für Deutschland und Europa.',          game:'slogan',  gname:'Slogan-Legenden',    xp:25,co:10},
+  {id:'ambition',  name:'The Ambition',            city:'Düsseldorf',   icon:'🎤',type:'Hip-Hop Consulting',   tc:'rgba(255,60,120,0.12)', tt:'#ff60a0',clients:'edding, LFDY, Telekommunikation', desc:'Deutschlands führende Consulting-Agentur für Hip-Hop-Kultur und Cultural Marketing.',           game:'hiphop',  gname:'Hip-Hop Brand Match',xp:20,co:8},
+  {id:'publicis',  name:'Publicis Groupe',         city:'Frankfurt',    icon:'🌐',type:'Netzwerkagentur',      tc:'rgba(92,200,255,0.1)',  tt:'#7ccfff',clients:'MINI, Renault, Samsung, Nestlé',  desc:'Eines der größten globalen Kommunikationsnetzwerke – über 80.000 Mitarbeitende.',               game:'trend',   gname:'Trend oder Flop?',   xp:25,co:10},
+  {id:'wpp',       name:'WPP / Ogilvy DE',         city:'Düsseldorf',   icon:'💼',type:'Holdinggruppe',        tc:'rgba(255,100,80,0.1)',  tt:'#ff9080',clients:'Unilever, Ford, Nestlé, BP',      desc:'Weltgrößte Kommunikationsholding – strategische Budget-Allokation auf höchstem Niveau.',        game:'budget',  gname:'Budget Allocator',   xp:30,co:12},
+];
+
+const LOGOS=[
+  {e:'🍺',    a:"Beck's",       o:["Beck's",'Warsteiner','Bitburger','Paulaner']},
+  {e:'🚗💛⚫',a:'ADAC',         o:['ADAC','TÜV','Dekra','AVUS']},
+  {e:'🟣🟡',  a:'Milka',        o:['Milka','Cadbury','Ritter Sport','Lindt']},
+  {e:'🌊🔵',  a:'Nivea',        o:['Nivea','Dove','Neutrogena','Eucerin']},
+  {e:'✅🔴',  a:'Vodafone',     o:['Vodafone','Telekom','O2','1&1']},
+  {e:'🦅🔵',  a:'Deutsche Bank',o:['Deutsche Bank','Commerzbank','Sparkasse','DKB']},
+];
+
+const PITCHES=[
+  {brief:'Supermarkt sucht emotionale Weihnachtskampagne – gesellschaftlich relevant, viral-fähig, mutig.',
+   opts:['Klassischer TV-Spot mit Familie am Tisch','Kurzfilm über Einsamkeit an Weihnachten mit überraschendem Twist','Rabatt-Aktionswerbung im Prospekt','Instagram-Gewinnspiel'],
+   cor:1,exp:'Serviceplan gewann mit Penny den Cannes Grand Prix mit dem emotionalen Kurzfilm "Der Wunsch".'},
+  {brief:'Automobilmarke will Neuausrichtung zur E-Mobilität kommunizieren – minimalistisch, zeitgeistig.',
+   opts:['Großes Preisschild-Banner','Langfilm über Fabrikproduktion','Visuelle Kampagne die das Weglassen feiert: "MINImalism"','Direkter Konkurrenzvergleich'],
+   cor:2,exp:'"MINImalism" für MINI wurde international ausgezeichnet – weniger kommuniziert mehr.'},
+  {brief:'NGO will Barrierefreiheit für Blinde weltweit in den Fokus rücken.',
+   opts:['Print-Anzeige in Blindenschrift','Interaktive Braille-Display-Erfahrung Dot by Dot','Social-Media-Hashtag-Kampagne','Influencer-Kooperation mit Prominenten'],
+   cor:1,exp:'"Making the World Accessible, Dot by Dot" – Platz 16 weltweit im WARC-Ranking.'},
+];
+
+const CREATORS=[
+  {brief:'Kampagne für eine neue Bio-Supermarkt-Kette. Zielgruppe: Junge Familien 25–40, nachhaltigkeitsbewusst.',
+   creators:[{n:'Food & Lifestyle',e:'🍽️'},{n:'Gaming',e:'🎮'},{n:'Fitness',e:'💪'},{n:'Finance',e:'💰'},{n:'Mama-Blog',e:'👩‍👧'},{n:'Reise',e:'✈️'}],
+   cor:[0,4],exp:'Food & Lifestyle und Mama-Blogs erreichen die Zielgruppe authentisch.'},
+  {brief:'Launch einer Gaming-Laptop-Serie für E-Sport-Enthusiasten, Gen Z, 16–24 Jahre.',
+   creators:[{n:'Gaming',e:'🎮'},{n:'Kochen',e:'🍳'},{n:'Esports',e:'🏆'},{n:'Fashion',e:'👗'},{n:'Tech Review',e:'💻'},{n:'Comedy',e:'😂'}],
+   cor:[0,2,4],exp:'Gaming, Esports und Tech-Reviewer treffen die Community direkt.'},
+  {brief:'Neobank-Startup, Zielgruppe: Millennials mit erstem Job – authentisch, nicht steif.',
+   creators:[{n:'Finance',e:'💰'},{n:'Career',e:'👔'},{n:'Beauty',e:'💄'},{n:'Gaming',e:'🎮'},{n:'Reise',e:'✈️'},{n:'Lifestyle',e:'🌟'}],
+   cor:[0,1,5],exp:'Finance, Career und Lifestyle-Creator sprechen Berufsstarter glaubwürdig an.'},
+];
+
+const HEADLINES=[
+  {brief:'EasyJet möchte Deutsche zum Reisen ins Ausland animieren – Zielgruppe: Reisemüde, humoraffin.',
+   opts:['„Günstig. Direkt. Jetzt buchen."','„Inländer raus."','„Deutschland ist schön. Aber der Rest der Welt auch."','„Fliegen leicht gemacht."'],
+   cor:1,exp:'"Inländer raus" sorgte für massiven Wirbel und virales Engagement – eine der mutigsten deutschen Kampagnen.'},
+  {brief:'Spotify möchte zeigen, dass Musik jeden Moment besser macht – frech, kurz, urban.',
+   opts:['„Musik für jeden Moment."','„Stream it. Love it."','„Wer Musik hat, braucht keine Worte."','„Your life. Your soundtrack."'],
+   cor:2,exp:'DOJO schreibt Lines die kulturell verankert sind und nicht nach Standard-Werbung klingen.'},
+  {brief:'Aldi Süd möchte zeigen, dass Qualität kein Luxus sein muss – provokant, selbstbewusst.',
+   opts:['„Qualität zum kleinen Preis."','„Gutes. Günstig. Gut."','„Wer clever kauft, kauft hier."','„Aldi. Weil gut nicht teuer sein muss."'],
+   cor:3,exp:'DOJO schreibt Headlines die direkt ansprechen und klar eine Haltung zeigen.'},
+];
+
+const SLOGANS=[
+  {text:'"Dahinter steckt immer ein kluger Kopf."',ans:'Frankfurter Allgemeine Zeitung',opts:['Frankfurter Allgemeine Zeitung','Der Spiegel','Süddeutsche Zeitung','Die Zeit']},
+  {text:'"Umparken im Kopf."',ans:'Opel',opts:['Opel','Volkswagen','Ford','Renault']},
+  {text:'"Wir können alles. Außer Hochdeutsch."',ans:'Baden-Württemberg',opts:['Baden-Württemberg','Bayern','Sachsen','Österreich']},
+  {text:'"Das Handwerk. Die Wirtschaftsmacht. Von nebenan."',ans:'Deutsches Handwerk',opts:['Deutsches Handwerk','IHK','Bundesagentur für Arbeit','DGB']},
+  {text:'"Runter vom Gas."',ans:'BMVJ / Verkehrssicherheit',opts:['BMVJ / Verkehrssicherheit','ADAC','TÜV','Deutsche Bahn']},
+];
+
+const HIPHOP=[
+  {sc:'Ein deutsches Traditions-Unternehmen für Stifte und Marker kollaborierte mit einer der gehyptesten deutschen Streetwear-Brands für einen limitierten Drop.',
+   ans:'edding x LFDY',opts:['edding x LFDY','Pilot x BSTN','Stabilo x Snipes','Staedtler x SVD']},
+  {sc:'Nike kollaborierte mit einem US-Rap-Superstar für eine limitierte Sneaker-Serie – ausverkauft in Minuten, bis heute legendär.',
+   ans:'Nike x Travis Scott',opts:['Nike x Travis Scott','Adidas x Kanye','Puma x J. Cole','Reebok x Cardi B']},
+  {sc:'Ein Luxushaus beauftragte einen Grammy-Gewinner als Creative Director – erste Kollektion erschien 2024.',
+   ans:'Louis Vuitton x Pharrell',opts:['Louis Vuitton x Pharrell','Gucci x Tyler','Balenciaga x Ye','Valentino x Drake']},
+  {sc:'Welche deutsche Automobilmarke ist in der Hip-Hop-Kultur am tiefsten verankert – durch Songverweise und unzählige Musikvideos?',
+   ans:'Mercedes-Benz',opts:['Mercedes-Benz','BMW','Audi','Porsche']},
+];
+
+const TRENDS=[
+  {s:'MINI launcht eine Kampagne, die betont was das Auto NICHT hat – keine Spielerei, nur das Wesentliche.',a:'trend',e:'Weniger-ist-mehr trifft den Zeitgeist von Anti-Überfluss und bewusstem Konsum.'},
+  {s:'Renault bewirbt auf Fax-Geräten ihre neue App für unter-30-Jährige.',a:'flop',e:'Fax ist ausgestorben – komplett falsche Zielgruppe auf falschem Kanal.'},
+  {s:'Samsung schaltet zur WM eine Echtzeit-Kampagne, die live auf den Spielverlauf reagiert.',a:'trend',e:'Real-Time Marketing bei Live-Events schafft enorme Relevanz und virale Momente.'},
+  {s:'Ein Pharmaunternehmen nutzt TikTok-Duets für die Einführung rezeptpflichtiger Medikamente.',a:'flop',e:'Pharma auf TikTok: regulatorisch hochriskant und passt nicht zur Zielgruppe.'},
+  {s:'Unilever-Marke Dove zeigt bewusst unretouchierte Körper in einer großen Markenkampagne.',a:'trend',e:'"Real Beauty" gilt als eine der wirkungsvollsten Markenkampagnen der Geschichte.'},
+];
+
+const BUDGET={brief:'Nestlé launcht ein neues Produkt. Ziel: Awareness + Abverkauf. Budget: 500.000 €. Verteile auf TV, Digital, Instore & PR.',
+  channels:['TV','Digital','Instore','PR'],ideal:[40,35,15,10],tol:12};
+
+let curQ=0,curData=[],selCr=[];
+const sh=a=>[...a].sort(()=>Math.random()-.5);
+
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');window.scrollTo(0,0);}
+
+function startGame(){document.getElementById('hud').style.display='flex';document.getElementById('xpw').style.display='block';buildCity();updateHUD();go('world');}
+
+function updateHUD(){document.getElementById('hlvl').textContent=S.level;document.getElementById('hxp').textContent=S.xp+'/'+S.next;document.getElementById('hco').textContent=S.coins;document.getElementById('xpfill').style.width=Math.min(100,Math.round(S.xp/S.next*100))+'%';}
+
+function gainXP(x,c){S.xp+=x;S.coins+=c;if(S.xp>=S.next){S.xp-=S.next;S.level++;S.next=Math.round(S.next*1.5);updateHUD();document.getElementById('lunum').textContent=S.level;document.getElementById('lumsg').textContent='Du bist jetzt Level '+S.level+'! 🚀';setTimeout(()=>go('levelup'),700);}else updateHUD();}
+
+function buildCity(){const g=document.getElementById('citygrid');g.innerHTML='';AGENCIES.forEach(ag=>{const done=S.done[ag.id];const c=document.createElement('div');c.className='agc';c.innerHTML=`${done?'<div class="ag-done">✓ Done</div>':''}<div class="ag-icon">${ag.icon}</div><div class="ag-name">${ag.name}</div><div class="ag-city">📍 ${ag.city}</div><div class="ag-tag" style="background:${ag.tc};color:${ag.tt}">${ag.type}</div>`;c.onclick=()=>enterAgency(ag.id);g.appendChild(c);});}
+
+function enterAgency(id){S.agency=id;const ag=AGENCIES.find(a=>a.id===id);const done=S.done[id];document.getElementById('aghdr').innerHTML=`<div class="hub-title">${ag.icon} ${ag.name}</div><div class="hub-meta">📍 ${ag.city} · ${ag.type}<br>${ag.desc}</div><div class="hub-clients">Clients: ${ag.clients}</div>`;document.getElementById('agqs').innerHTML=`<div class="q-name">${ag.gname}</div><div class="q-meta">+${ag.xp} XP · +${ag.co} Coins</div>${done?'<div class="q-done">✓ Quest abgeschlossen</div>':`<button class="btn btnp btns" onclick="startGameOf('${ag.game}')">Quest starten →</button>`}`;go('agency');}
+
+function startGameOf(g){({logo:startLogo,pitch:startPitch,creator:startCreator,headline:startHeadline,slogan:startSlogan,hiphop:startHiphop,trend:startTrend,budget:startBudget})[g]();}
+
+function finishGame(id,xp,co){if(!S.done[id]){S.done[id]=true;gainXP(xp,co);}buildCity();setTimeout(()=>enterAgency(id),1400);}
+
+// LOGO
+function startLogo(){curQ=0;curData=sh(LOGOS);renderLogo();go('logo');}
+function renderLogo(){const q=curData[curQ];document.getElementById('logemoji').textContent=q.e;document.getElementById('logprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('logfb').innerHTML='';document.getElementById('lognxt').style.display='none';const c=document.getElementById('logopts');c.innerHTML='';sh(q.o).forEach(o=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>ansLogo(o,q.a,c);c.appendChild(b);});}
+function ansLogo(ch,cor,c){c.querySelectorAll('.opt').forEach(b=>{b.onclick=null;if(b.textContent===cor)b.classList.add('correct');else if(b.textContent===ch&&ch!==cor)b.classList.add('wrong');});if(ch===cor){document.getElementById('logfb').innerHTML='<div class="fb fb-ok">Richtig! +5 XP</div>';gainXP(5,2);}else document.getElementById('logfb').innerHTML='<div class="fb fb-fail">Falsch – richtig: '+cor+'</div>';document.getElementById('lognxt').style.display='block';}
+function nextLogo(){curQ++;if(curQ>=curData.length)finishGame('jvm',25,10);else renderLogo();}
+
+// PITCH
+function startPitch(){curQ=0;curData=sh(PITCHES);renderPitch();go('pitch');}
+function renderPitch(){const q=curData[curQ];document.getElementById('pitchbrief').textContent=q.brief;document.getElementById('pitchprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('pitchfb').innerHTML='';document.getElementById('pitchnxt').style.display='none';const c=document.getElementById('pitchopts');c.innerHTML='';q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='colopt';b.textContent=o;b.onclick=()=>ansPitch(i,q.cor,q.exp,c);c.appendChild(b);});}
+function ansPitch(i,cor,exp,c){c.querySelectorAll('.colopt').forEach((b,j)=>{b.onclick=null;if(j===cor)b.classList.add('correct');else if(j===i&&i!==cor)b.classList.add('wrong');});if(i===cor){document.getElementById('pitchfb').innerHTML=`<div class="fb fb-ok">Richtig! ${exp} +8 XP</div>`;gainXP(8,3);}else document.getElementById('pitchfb').innerHTML=`<div class="fb fb-fail">${exp}</div>`;document.getElementById('pitchnxt').style.display='block';}
+function nextPitch(){curQ++;if(curQ>=curData.length)finishGame('serviceplan',30,12);else renderPitch();}
+
+// CREATOR
+function startCreator(){curQ=0;selCr=[];curData=sh(CREATORS);renderCreator();go('creator');}
+function renderCreator(){const q=curData[curQ];selCr=[];document.getElementById('crbrief').textContent=q.brief;document.getElementById('crprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('crfb').innerHTML='';document.getElementById('crnxt').style.display='none';const c=document.getElementById('cropts');c.innerHTML='';q.creators.forEach((cr,i)=>{const d=document.createElement('div');d.className='crcard';d.innerHTML=`<div class="cricon">${cr.e}</div><div>${cr.n}</div>`;d.onclick=()=>{const x=selCr.indexOf(i);if(x>=0){selCr.splice(x,1);d.classList.remove('selected');}else{selCr.push(i);d.classList.add('selected');}};c.appendChild(d);});const btn=document.createElement('button');btn.id='crconfirm';btn.className='btn btnp btns';btn.style.marginTop='8px';btn.textContent='Bestätigen';btn.onclick=()=>confCreator(q,c);c.after(btn);}
+function confCreator(q,c){const cards=[...c.querySelectorAll('.crcard')];const ok=q.cor.every(i=>selCr.includes(i))&&selCr.every(i=>q.cor.includes(i));cards.forEach((card,i)=>{card.onclick=null;card.classList.remove('selected');if(q.cor.includes(i))card.classList.add('correct');else if(selCr.includes(i))card.classList.add('wrong');});if(ok){document.getElementById('crfb').innerHTML=`<div class="fb fb-ok">Super! ${q.exp} +8 XP</div>`;gainXP(8,3);}else document.getElementById('crfb').innerHTML=`<div class="fb fb-fail">${q.exp}</div>`;const b=document.getElementById('crconfirm');if(b)b.remove();document.getElementById('crnxt').style.display='block';}
+function nextCreator(){selCr=[];const b=document.getElementById('crconfirm');if(b)b.remove();curQ++;if(curQ>=curData.length)finishGame('abcc',25,10);else renderCreator();}
+
+// HEADLINE (DOJO)
+function startHeadline(){curQ=0;curData=sh(HEADLINES);renderHeadline();go('headline');}
+function renderHeadline(){const q=curData[curQ];document.getElementById('hlbrief').textContent=q.brief;document.getElementById('hlprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('hlfb').innerHTML='';document.getElementById('hlnxt').style.display='none';const c=document.getElementById('hlopts');c.innerHTML='';q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='colopt';b.textContent=o;b.onclick=()=>ansHL(i,q.cor,q.exp,c);c.appendChild(b);});}
+function ansHL(i,cor,exp,c){c.querySelectorAll('.colopt').forEach((b,j)=>{b.onclick=null;if(j===cor)b.classList.add('correct');else if(j===i&&i!==cor)b.classList.add('wrong');});if(i===cor){document.getElementById('hlfb').innerHTML=`<div class="fb fb-ok">Richtig! ${exp} +8 XP</div>`;gainXP(8,3);}else document.getElementById('hlfb').innerHTML=`<div class="fb fb-fail">${exp}</div>`;document.getElementById('hlnxt').style.display='block';}
+function nextHeadline(){curQ++;if(curQ>=curData.length)finishGame('dojo',25,10);else renderHeadline();}
+
+// SLOGAN (Scholz & Friends)
+function startSlogan(){curQ=0;curData=sh(SLOGANS);renderSlogan();go('slogan');}
+function renderSlogan(){const q=curData[curQ];document.getElementById('slogantext').textContent=q.text;document.getElementById('sloganprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('sloganfb').innerHTML='';document.getElementById('slogannxt').style.display='none';const c=document.getElementById('sloganopts');c.innerHTML='';sh(q.opts).forEach(o=>{const b=document.createElement('button');b.className='colopt';b.textContent=o;b.onclick=()=>ansSlogan(o,q.ans,c);c.appendChild(b);});}
+function ansSlogan(ch,cor,c){c.querySelectorAll('.colopt').forEach(b=>{b.onclick=null;if(b.textContent===cor)b.classList.add('correct');else if(b.textContent===ch&&ch!==cor)b.classList.add('wrong');});if(ch===cor){document.getElementById('sloganfb').innerHTML='<div class="fb fb-ok">Richtig! Scholz & Friends schufen diesen Ikoniker. +5 XP</div>';gainXP(5,2);}else document.getElementById('sloganfb').innerHTML='<div class="fb fb-fail">Falsch – es war: '+cor+'</div>';document.getElementById('slogannxt').style.display='block';}
+function nextSlogan(){curQ++;if(curQ>=curData.length)finishGame('scholz',25,10);else renderSlogan();}
+
+// HIP-HOP (The Ambition)
+function startHiphop(){curQ=0;curData=sh(HIPHOP);renderHiphop();go('hiphop');}
+function renderHiphop(){const q=curData[curQ];document.getElementById('hhscenario').textContent=q.sc;document.getElementById('hhprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('hhfb').innerHTML='';document.getElementById('hhnxt').style.display='none';const c=document.getElementById('hhopts');c.innerHTML='';sh(q.opts).forEach(o=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>ansHH(o,q.ans,c);c.appendChild(b);});}
+function ansHH(ch,cor,c){c.querySelectorAll('.opt').forEach(b=>{b.onclick=null;if(b.textContent===cor)b.classList.add('correct');else if(b.textContent===ch&&ch!==cor)b.classList.add('wrong');});if(ch===cor){document.getElementById('hhfb').innerHTML='<div class="fb fb-ok">Richtig! +5 XP</div>';gainXP(5,2);}else document.getElementById('hhfb').innerHTML='<div class="fb fb-fail">Falsch – richtig: '+cor+'</div>';document.getElementById('hhnxt').style.display='block';}
+function nextHiphop(){curQ++;if(curQ>=curData.length)finishGame('ambition',20,8);else renderHiphop();}
+
+// TREND
+function startTrend(){curQ=0;curData=sh(TRENDS);renderTrend();go('trend');}
+function renderTrend(){const t=curData[curQ];document.getElementById('trendscen').textContent=t.s;document.getElementById('trendprog').textContent=`Frage ${curQ+1} von ${curData.length}`;document.getElementById('trendfb').innerHTML='';document.getElementById('trendbtns').style.display='grid';document.getElementById('trendnxt').style.display='none';}
+function answerTrend(ch){const t=curData[curQ];document.getElementById('trendbtns').style.display='none';if(ch===t.a){document.getElementById('trendfb').innerHTML=`<div class="fb fb-ok">Richtig! ${t.e} +5 XP</div>`;gainXP(5,2);}else document.getElementById('trendfb').innerHTML=`<div class="fb fb-fail">${t.e}</div>`;document.getElementById('trendnxt').style.display='block';}
+function nextTrend(){curQ++;if(curQ>=curData.length)finishGame('publicis',25,10);else renderTrend();}
+
+// BUDGET
+function startBudget(){document.getElementById('budbrief').textContent=BUDGET.brief;document.getElementById('budfb').innerHTML='';const c=document.getElementById('budsliders');c.innerHTML='';BUDGET.channels.forEach((_,i)=>{c.innerHTML+=`<div class="slwrap"><div class="sllabel"><span>${BUDGET.channels[i]}</span><span id="bv${i}">25 %</span></div><input type="range" min="0" max="80" value="25" step="1" id="bs${i}" oninput="updBudget()"></div>`;});updBudget();go('budget');}
+function updBudget(){let t=0;BUDGET.channels.forEach((_,i)=>{const v=parseInt(document.getElementById('bs'+i).value);t+=v;document.getElementById('bv'+i).textContent=v+' %';});document.getElementById('budtotal').textContent=t+' %';}
+function checkBudget(){let ok=0;BUDGET.channels.forEach((_,i)=>{if(Math.abs(parseInt(document.getElementById('bs'+i).value)-BUDGET.ideal[i])<=BUDGET.tol)ok++;});if(ok>=3){document.getElementById('budfb').innerHTML=`<div class="fb fb-ok">Sehr gut! ${ok}/4 optimal. +30 XP</div>`;finishGame('wpp',30,12);}else document.getElementById('budfb').innerHTML=`<div class="fb fb-fail">Nur ${ok}/4 optimal. Richtwert: ${BUDGET.channels.map((c,i)=>c+' '+BUDGET.ideal[i]+'%').join(', ')}</div>`;}
+</script>
+</body>
+</html>
